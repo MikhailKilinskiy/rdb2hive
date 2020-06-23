@@ -1,0 +1,10 @@
+hive_connection:
+teradata_connection:
+user:
+password:
+
+teradata_source:
+hive_sink:
+parttion_column:
+partition_values:
+fs:

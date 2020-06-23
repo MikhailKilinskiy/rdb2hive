@@ -1,0 +1,87 @@
+group 'org'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'scala'
+apply plugin: 'maven-publish'
+apply plugin: 'distribution'
+
+
+sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+configurations {
+    fatJar {
+        extendsFrom runtime
+
+        //exclude group: 'org.scala-lang'
+        exclude module: 'spark-core_2.11'
+        exclude module: 'spark-sql_2.11'
+        exclude module: 'spark-hive_2.11'
+        exclude module:'hive-jdbc'
+    }
+}
+
+
+dependencies {
+
+    compile fileTree("libs") {
+        include '*.jar'
+    }
+
+    compile(group: 'org.scala-lang', name: 'scala-library', version: '2.11.12')
+    compile(group: 'org.scala-lang', name: 'scala-reflect', version: '2.11.12')
+    compile(group: 'org.scala-lang', name: 'scala-compiler', version: '2.11.12')
+    compile(group: 'org.apache.spark', name: 'spark-core_2.11', version: '2.3.0')
+    compile(group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.3.0')
+    compile(group: 'org.apache.spark', name: 'spark-hive_2.11', version: '2.3.0')
+
+    compile(group: 'org.apache.orc', name: 'orc-core', version: '1.4.1', classifier: 'nohive')
+    compile group: 'org.apache.orc', name: 'orc-mapreduce', version: '1.4.1', classifier: 'nohive'
+
+
+    compile(group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.7.3.2.6.5.0-292')
+    compile(group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.6.5')
+    compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28')
+    compile(group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.28')
+    compile(group: 'org.apache.hive', name: 'hive-jdbc', version: '1.2.1000.2.6.5.0-292')
+    compile(group: 'org.yaml', name: 'snakeyaml', version: '1.25')
+
+}
+
+task(fatJar, type: Jar) {
+    classifier = 'fatJar'
+
+    manifest {
+        attributes (
+                'Main-Class': 'org.bigdata.RunLoader',
+        )
+    }
+    from { configurations.fatJar.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+
+}
+
